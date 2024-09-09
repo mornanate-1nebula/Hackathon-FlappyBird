@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+    <h1 id="title" class="absolute text-white title-position score-font">Kracky Bird</h1>
+    <h1 id="score" class="absolute text-white score-position score-font">Score : 0</h1>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r126/three.min.js"></script>
+    <script src="scripts/cylinders.js"></script>
+    <script src="scripts/player.js"></script>
+    <script src="scripts/helpers.js"></script>
+    <script>
+        //DEFINE IMPORTANT STUFF
+
+        const scene = new THREE.Scene();
+
+
+        const texture = new THREE.TextureLoader().load('assets/bg.jpg');
+        scene.background = texture;
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setAnimationLoop(runTheFlaps);
+
+        document.body.appendChild(renderer.domElement);
+
+        //ZOOM OUT TO SEE THE PLAYER
+        camera.position.z = 4;
+
+        //HELPER STUFF IF NEEDED
+
+        var helper = new HelpersHandler(scene);
+        // helper.useGridHelper();
+
+        //RENDER OBJECTS IN THE SCENE
+
+        const player = new PlayerHandler(scene);
+        player.init();
+
+        const pipeHandler = new PipeHandler(scene);
+        pipeHandler.init();
+
+        // ADD SOUND TO THE CAMERA TO MAKE FLAPPY EPIC
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+
+        // create a global audio source
+        const sound = new THREE.Audio(listener);
+
+        // load a sound and set it as the Audio object's buffer
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('assets/vibes.mp3', function (buffer) {
+            sound.setBuffer(buffer);
+            sound.setLoop(true);
+            sound.setVolume(20);
+            sound.play();
+        });
+
+        //OTHER STUFF
+
+
+
+        //DO THE MAGIC HERE
+
+        window.addEventListener('click', flapFlaps2);
+
+        var player_Y = 5;
+
+        function flapFlaps2() {
+            if (player_Y <= 10) player_Y += 1;
+            player.mesh.position.y = player_Y;
+            camera.position.y = player_Y;
+        }
+
+        function flapFlaps(shouldFall) {
+            if (player_Y >= 0) player_Y -= 0.05;
+            player.mesh.position.y = player_Y;
+            camera.position.y = player_Y;
+        }
+
+        var playerCounter = 0;
+
+        function runTheFlaps() {
+            pipeHandler.animate();
+
+
+            player.mesh.rotation.x += 0.02;
+            player.mesh.rotation.y += 0.02;
+
+            flapFlaps(true);
+
+
+            document.getElementById("score").innerHTML = 'Score : ' + playerCounter;
+
+            renderer.render(scene, camera);
+        }
+
+    </script>
+
+</body>
+
+</html>
